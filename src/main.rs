@@ -1,12 +1,13 @@
+extern crate pretty_env_logger;
 use warp::Filter;
 
+#[macro_use] extern crate log;
 #[tokio::main]
 async fn main() {
-    // GET /hello/warp => 200 OK with body "Hello, warp!"
-    let hello = warp::path!("hello" / String)
-        .map(|name| format!("Hello, {}!", name));
+    pretty_env_logger::init();
 
-    warp::serve(hello)
+    info!("Starting Picard!");
+    warp::serve(warp::fs::dir("public_html"))
         .run(([127, 0, 0, 1], 3030))
         .await;
 }
