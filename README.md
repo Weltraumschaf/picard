@@ -10,5 +10,5 @@ cargo clean && cargo build && ./target/debug/picard
 ```
 
 ```bash
-curl -i http://localhost:3030/hello/world
+curl -i http://localhost:3030/todos
 ```
