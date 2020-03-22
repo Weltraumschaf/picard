@@ -1,63 +1,68 @@
-[env]
-# all workspace members can use this Makefile
-CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = "true"
-PORT = "8000"
 
-# ---- BUILD & CREATE WASMS ----
-[tasks.compile]
-description = "Build"
-workspace = false
-command = "cargo"
-args = ["build"]
-
-[tasks.compile_release]
-description = "Build, with the --release flag"
-workspace = false
-command = "cargo"
-args = ["build", "--release"]
-
-[tasks.create_wasm]
-description = "Build with wasm-pack"
-install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V", min_version = "0.8.0" }
-command = "wasm-pack"
-args = ["build", "--target", "web", "--out-name", "package", "--dev"]
-
-[tasks.create_wasm_release]
-description = "Build with wasm-pack"
-install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V", min_version = "0.8.0" }
-command = "wasm-pack"
-args = ["build", "--target", "web", "--out-name", "package"]
+# ---- BUILD ----
 
 [tasks.build]
-description = "Build, and create wasms"
+description = "Build client and server"
+clear = true
 workspace = false
-dependencies = ["compile", "create_wasm"]
+dependencies = ["build_client", "build_server"]
 
 [tasks.build_release]
-description = "Build, and create wasms, with the release flag"
-workspace = false
-dependencies = ["compile_release", "create_wasm_release"]
+extend = "build"
+description = "Build client and server in release mode"
+dependencies = ["build_client_release", "build_server_release"]
 
-[tasks.watch]
-description = "Build, create wasms, and watch/recompile files for changes"
+[tasks.build_client]
+description = "Build client"
 workspace = false
-dependencies = ["build", "create_wasm"]
-watch = { ignore_pattern="pkg/*" }
+install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V" }
+command = "wasm-pack"
+args = ["build", "client", "--target", "web", "--out-name", "package", "--dev"]
 
-[tasks.serve]
-description = "Start server"
-install_crate = { crate_name = "microserver", binary = "microserver", test_arg = "-h" }
+[tasks.build_client_release]
+extend = "build_client"
+description = "Build client in release mode"
+args = ["build", "client", "--target", "web", "--out-name", "package", "--release"]
+
+[tasks.build_server]
+description = "Build server"
 workspace = false
-command = "microserver"
-args = ["--port", "${PORT}"]
+command = "cargo"
+args = ["build", "--package", "server"]
+
+[tasks.build_server_release]
+extend = "build_server"
+description = "Build server in release mode"
+args = ["build", "--package", "server", "--release"]
+
+# ---- START ----
 
 [tasks.start]
-description = "Combine the build and serve tasks"
+description = "Build and start Actix server with client on port 8000"
 workspace = false
-dependencies = ["build", "serve"]
+command = "cargo"
+args = ["run", "--package", "server"]
+dependencies = ["build"]
 
+[tasks.start_release]
+extend = "start"
+description = "Build and start Actix server with client on port 8000 in release mode"
+args = ["run", "--package", "server", "--release"]
+dependencies = ["build_release"]
 
 # ---- LINT ----
+
+[tasks.fmt]
+description = "Format with rustfmt"
+workspace = false
+install_crate = { crate_name = "rustfmt-nightly", rustup_component_name = "rustfmt", binary = "rustfmt", test_arg = "--help" }
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.fmt_check]
+extend = "fmt"
+description = "Check format with rustfmt"
+args = ["fmt", "--all", "--", "--check"]
 
 [tasks.clippy]
 description = "Lint with Clippy"
@@ -65,35 +70,4 @@ clear = true
 workspace = false
 install_crate = { rustup_component_name = "clippy", binary = "cargo-clippy", test_arg = "--help" }
 command = "cargo"
-args = ["clippy", "--all-features", "--", "--deny", "warnings", "--deny", "clippy::pedantic", "--deny", "clippy::nursery"]
-
-[tasks.fmt]
-description = "Format with rustfmt"
-workspace = false
-dependencies = ["fmt"]
-
-
-# ---- TEST ----
-
-[tasks.test]
-description = "Run tests. Ex: 'cargo make test firefox'. Test envs: [chrome, firefox, safari]"
-clear = true
-workspace = false
-install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V", min_version = "0.8.0" }
-command = "wasm-pack"
-args = ["test", "--${@}"]
-
-[tasks.test_release]
-extend = "test"
-description = "Run tests in release mode. Ex: 'cargo make test firefox'. Test envs: [chrome, firefox, safari]"
-args = ["test", "--${@}", "--release"]
-
-[tasks.test_h]
-description = "Run headless tests. Ex: 'cargo make test_h firefox'. Test envs: [chrome, firefox, safari]"
-extend = "test"
-args = ["test", "--headless", "--${@}"]
-
-[tasks.test_h_release]
-extend = "test_h"
-description = "Run headless tests in release mode. Ex: 'cargo make test_h firefox'. Test envs: [chrome, firefox, safari]"
-args = ["test", "--headless", "--${@}", "--release"]
+args = ["clippy", "--all-features", "--", "--deny", "clippy::all", "--deny", "clippy::pedantic", "--deny", "clippy::nursery"]
