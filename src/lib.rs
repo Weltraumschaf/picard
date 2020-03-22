@@ -22,7 +22,11 @@ enum Msg {
 fn update(msg: Msg, model: &mut Model, _: &mut impl Orders<Msg>) {
     match msg {
         Msg::Increment => model.val += 1,
-        Msg::Decrement => model.val -= 1,
+        Msg::Decrement => {
+            if model.val > 0 {
+                model.val -= 1
+            }
+        }
     }
 }
 
