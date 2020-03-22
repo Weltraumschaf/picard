@@ -1,0 +1,11 @@
+[package]
+name = "shared"
+version = "1.0.0"
+authors = ["Sven Strittmatter <ich@weltraumschaf.de>"]
+repository = "https://github.com/Weltraumschaf/picard"
+readme = "README.md"
+license = "http://weltraumschaf.de/the-beer-ware-license.txt"
+edition = "2018"
+
+[dependencies]
+serde = { version = "^1.0.92" }
