@@ -16,11 +16,13 @@ impl Default for Model {
 #[derive(Clone)]
 enum Msg {
     Increment,
+    Decrement,
 }
 
 fn update(msg: Msg, model: &mut Model, _: &mut impl Orders<Msg>) {
     match msg {
         Msg::Increment => model.val += 1,
+        Msg::Decrement => model.val -= 1,
     }
 }
 
@@ -32,9 +34,13 @@ fn view(model: &Model) -> impl View<Msg> {
         p!["This is a Seed based Rust WASM example application."],
         button![
             simple_ev(Ev::Click, Msg::Increment),
-            "Counter"
+            "+"
         ],
-        span![format!("Clicked {} times.", model.val)],
+        button![
+            simple_ev(Ev::Click, Msg::Decrement),
+            "-"
+        ],
+        span![format!("Counter: {}", model.val)],
     ]
 }
 
