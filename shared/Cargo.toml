@@ -8,4 +8,4 @@ license = "http://weltraumschaf.de/the-beer-ware-license.txt"
 edition = "2018"
 
 [dependencies]
-serde = { version = "^1.0.92" }
+serde = { version = "^1.0.105", features = ["derive"] }
