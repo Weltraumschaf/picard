@@ -36,3 +36,7 @@ needed, run `cargo make watch` instead of `cargo make build`.
 
 1. Run `cargo make build release`
 2. Upload `index.html` and `pkg` to your web server
+
+## Frontend Stuff
+
+- [Bourbon SASS lib](https://www.bourbon.io/docs/latest/)
